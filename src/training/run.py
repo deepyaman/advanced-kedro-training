@@ -28,14 +28,20 @@
 
 """Application entry point."""
 from pathlib import Path
-from typing import Any, Dict
 
 from kedro.context import KedroContext, load_context
 from kedro.extras.transformers import ProfileTimeTransformer  # new import
+from kedro.framework.hooks import hook_impl
 from kedro.io import DataCatalog
-from kedro.versioning import Journal
 
 from .memory_profile import ProfileMemoryTransformer  # new import
+
+
+class TransformerHooks:
+    @hook_impl
+    def after_catalog_created(self, catalog: DataCatalog) -> None:
+        catalog.add_transformer(ProfileTimeTransformer())
+        catalog.add_transformer(ProfileMemoryTransformer(), "master_table")
 
 
 class ProjectContext(KedroContext):
@@ -43,31 +49,14 @@ class ProjectContext(KedroContext):
     or create new ones (e.g. as required by plugins)
     """
 
-    def _create_catalog(
-        self,
-        conf_catalog: Dict[str, Any],
-        conf_creds: Dict[str, Any],
-        save_version: str = None,
-        journal: Journal = None,
-        load_versions: Dict[str, str] = None,
-    ) -> DataCatalog:
-        catalog = DataCatalog.from_config(
-            conf_catalog,
-            conf_creds,
-            save_version=save_version,
-            journal=journal,
-            load_versions=load_versions,
-        )
-        profile_time = ProfileTimeTransformer()
-        catalog.add_transformer(profile_time)
-
-        profile_memory = (
-            ProfileMemoryTransformer()
-        )  # instantiate our custom transformer
-        # as memory tracking is quite time-consuming, for the demonstration purposes
-        # let's apply profile_memory only to the master_table
-        catalog.add_transformer(profile_memory, "master_table")
-        return catalog
+    hooks = (
+        # register the collection of your Hook implementations here.
+        # Note that we are using an instance here, not a class. It could also be a
+        # module.
+        TransformerHooks(),
+    )
+    # You can add more than one hook by simply listing them
+    # in a tuple.`hooks = (Hook1(), Hook2())`
 
 
 def run_package():
