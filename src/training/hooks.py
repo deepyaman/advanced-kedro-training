@@ -32,7 +32,7 @@ from typing import Any, Dict, Iterable, Optional
 from kedro.config import ConfigLoader
 from kedro.framework.hooks import hook_impl
 from kedro.io import DataCatalog
-from kedro.pipeline import Pipeline
+from kedro.pipeline import Pipeline, pipeline
 from kedro.versioning import Journal
 
 from training.pipelines import data_engineering as de
@@ -49,11 +49,21 @@ class ProjectHooks:
 
         """
         data_engineering_pipeline = de.create_pipeline()
+        adapted_data_engineering_pipeline = pipeline(
+            data_engineering_pipeline,
+            inputs={"companies": "local_project_companies"},
+            outputs={"master_table": "local_project_master_table"},
+        )
         data_science_pipeline = ds.create_pipeline()
 
         return {
-            "__default__": data_engineering_pipeline + data_science_pipeline,
+            "__default__": adapted_data_engineering_pipeline
+            + pipeline(
+                data_science_pipeline,
+                inputs={"master_table": "local_project_master_table"},
+            ),
             "de": data_engineering_pipeline,
+            "ade": adapted_data_engineering_pipeline,
             "ds": data_science_pipeline,
         }
 
