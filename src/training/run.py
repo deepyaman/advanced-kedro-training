@@ -27,19 +27,47 @@
 # limitations under the License.
 
 """Application entry point."""
-from warnings import filterwarnings
 from pathlib import Path
+from typing import Any, Dict
 
 from kedro.context import KedroContext, load_context
+from kedro.extras.transformers import ProfileTimeTransformer  # new import
+from kedro.io import DataCatalog
+from kedro.versioning import Journal
 
-
-filterwarnings("ignore")
+from .memory_profile import ProfileMemoryTransformer  # new import
 
 
 class ProjectContext(KedroContext):
     """Users can override the remaining methods from the parent class here,
     or create new ones (e.g. as required by plugins)
     """
+
+    def _create_catalog(
+        self,
+        conf_catalog: Dict[str, Any],
+        conf_creds: Dict[str, Any],
+        save_version: str = None,
+        journal: Journal = None,
+        load_versions: Dict[str, str] = None,
+    ) -> DataCatalog:
+        catalog = DataCatalog.from_config(
+            conf_catalog,
+            conf_creds,
+            save_version=save_version,
+            journal=journal,
+            load_versions=load_versions,
+        )
+        profile_time = ProfileTimeTransformer()
+        catalog.add_transformer(profile_time)
+
+        profile_memory = (
+            ProfileMemoryTransformer()
+        )  # instantiate our custom transformer
+        # as memory tracking is quite time-consuming, for the demonstration purposes
+        # let's apply profile_memory only to the master_table
+        catalog.add_transformer(profile_memory, "master_table")
+        return catalog
 
 
 def run_package():
