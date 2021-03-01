@@ -35,6 +35,7 @@ from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline, pipeline
 from kedro.versioning import Journal
 
+from training.decorators import apply_f
 from training.pipelines import data_engineering as de
 from training.pipelines import data_science as ds
 
@@ -55,7 +56,8 @@ class ProjectHooks:
         data_science_pipeline = ds.create_pipeline()
 
         return {
-            "__default__": data_engineering_pipeline + data_science_pipeline,
+            "__default__": data_engineering_pipeline
+            + data_science_pipeline.decorate(apply_f),
             "de": data_engineering_pipeline,
             "ds": data_science_pipeline,
         }
