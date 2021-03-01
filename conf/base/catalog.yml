@@ -71,6 +71,12 @@ master_table:
   filepath: data/03_primary/master_table.csv
   layer: primary
 
+X_train:
+  type: pickle.PickleDataSet
+  filepath: data/05_model_input/X_train.pickle
+  layer: primary
+  versioned: true
+
 regressor:
   type: pickle.PickleDataSet
   filepath: data/06_models/regressor.pickle
