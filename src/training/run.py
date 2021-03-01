@@ -27,9 +27,13 @@
 # limitations under the License.
 
 """Application entry point."""
+from warnings import filterwarnings
 from pathlib import Path
 
 from kedro.context import KedroContext, load_context
+
+
+filterwarnings("ignore")
 
 
 class ProjectContext(KedroContext):
