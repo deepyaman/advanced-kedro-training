@@ -1,0 +1,9 @@
+companies:
+  type: training.datasets.CustomCSVDataSet
+  filepath: data/01_raw/companies.csv
+  layer: raw
+
+reviews:
+  type: training.datasets.CustomCSVDataSet
+  filepath: data/01_raw/reviews.csv
+  layer: raw
