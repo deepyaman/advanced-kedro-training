@@ -47,7 +47,7 @@ companies:
   layer: raw
 
 reviews:
-  type: pandas.CSVDataSet
+  type: training.datasets.CustomCSVDataSet
   filepath: data/01_raw/reviews.csv
   layer: raw
 
