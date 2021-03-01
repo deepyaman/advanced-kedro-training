@@ -32,7 +32,7 @@ from typing import Any, Dict, Iterable, Optional
 from kedro.config import ConfigLoader
 from kedro.framework.hooks import hook_impl
 from kedro.io import DataCatalog
-from kedro.pipeline import Pipeline
+from kedro.pipeline import Pipeline, pipeline
 from kedro.versioning import Journal
 
 from training.pipelines import data_engineering as de
@@ -48,7 +48,10 @@ class ProjectHooks:
             A mapping from a pipeline name to a ``Pipeline`` object.
 
         """
-        data_engineering_pipeline = de.create_pipeline()
+        data_engineering_pipeline = pipeline(
+            de.create_pipeline(),
+            outputs={"master_table": "ds_main_table"}
+        )
         data_science_pipeline = ds.create_pipeline()
 
         return {
